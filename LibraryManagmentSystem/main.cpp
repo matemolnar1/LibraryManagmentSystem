@@ -128,8 +128,19 @@ int main() {
 		cout << "6. Load from File" << endl;
         cout << "Choose an option: ";
         int choice;
-        cin >> choice;
-
+        while (true) {
+            cout << "Enter your choice: ";
+            if (cin >> choice) {
+                // Input was a valid integer!
+                break;
+            }
+            else {
+                // Input was NOT an integer
+                cout << "Invalid input. Please enter a number.\n";
+                cin.clear(); // 1. Reset the "fail" state
+                cin.ignore(10000, '\n'); // 2. Throw away the bad input
+            }
+        }
         switch (choice) {
             case 1: {
                 system("cls");
