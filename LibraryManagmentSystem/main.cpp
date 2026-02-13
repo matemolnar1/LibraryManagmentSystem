@@ -67,15 +67,62 @@ void searchBookByTitle(const vector<Book>& library, const string& title) {
 int main() {
     vector<Book> library;
 
-    Book book1("1984", "George Orwell");
+    /*Book book1("1984", "George Orwell");
     Book book2("Harry Potter", "J.K. Rowling");
     addBook(library, book1);
     addBook(library, book2);
 
     displayAllBooks(library);
-
+  
     searchBookByTitle(library, "1984");
-    searchBookByTitle(library, "The Great Gatsby");
+    searchBookByTitle(library, "The Great Gatsby");*/
+    while (true) {
+       
+		cout << "---------------------------" << endl;
+        cout << "\t LIBRARY \t" << endl;
+		cout << "---------------------------" << endl;
+        cout << "1. Add Book" << endl;
+		cout << "2. Display All Books" << endl;
+        cout << "3. Search Book by Title" << endl;
+        cout << "4. Exit" << endl;
+        cout << "Choose an option: ";
+        int choice;
+        cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                system("cls");
+                string title, author;
+                cout << "Enter book title: ";
+                cin.ignore();
+                getline(cin, title);
+                cout << "Enter book author: ";
+                getline(cin, author);
+                Book newBook(title, author);
+                addBook(library, newBook);
+                break;
+            }
+            case 2:
+                system("cls");
+                displayAllBooks(library);
+                break;
+            case 3: {
+                system("cls");
+                string title;
+                cout << "Enter book title to search: ";
+                cin.ignore();
+                getline(cin, title);
+                searchBookByTitle(library, title);
+                break;
+            }
+            case 4:
+                system("cls");
+                cout << "Exiting..." << endl;
+                return 0;
+            default:
+                cout << "Invalid choice. Please try again." << endl;
+        }
+    }
 
     return 0;
 }
