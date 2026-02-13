@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 
 using namespace std;
 
@@ -64,6 +65,44 @@ void searchBookByTitle(const vector<Book>& library, const string& title) {
     }
     cout << "Book with title '" << title << "' not found." << endl;
 }
+void saveToFile(const vector<Book>& library, const string & filename) {
+    ofstream Fout(filename);
+	if (!Fout) {
+        cerr << "Error opening file for writing." << endl;
+        return;
+    }
+    for(const auto& Book : library) {
+        Fout << Book.getTitle() << "," << Book.getAuthor() << "," << Book.getID() << "," << (Book.getAvailability() ? "1" : "0") << endl;
+    }
+	Fout.close();
+}
+void loadFromFile(vector<Book>& library, const string& filename) {
+    ifstream Fin(filename);
+    if (!Fin) {
+        cerr << "Error opening file for reading." << endl;
+        return;
+	}
+    string line;
+    while (getline(Fin, line)) {
+        size_t pos1 = line.find(',');
+        size_t pos2 = line.find(',', pos1 + 1);
+        size_t pos3 = line.find(',', pos2 + 1);
+        if (pos1 == string::npos || pos2 == string::npos || pos3 == string::npos) {
+            cerr << "Invalid data format in file." << endl;
+            continue;
+        }
+        string title = line.substr(0, pos1);
+        string author = line.substr(pos1 + 1, pos2 - pos1 - 1);
+        string ID = line.substr(pos2 + 1, pos3 - pos2 - 1);
+        bool isAvailable = (line.substr(pos3 + 1) == "1");
+        Book book(title, author);
+        book.setID(ID);
+        book.setAvailability(isAvailable);
+        library.push_back(book);
+    }
+	Fin.close();
+}
+
 int main() {
     vector<Book> library;
 
@@ -85,6 +124,8 @@ int main() {
 		cout << "2. Display All Books" << endl;
         cout << "3. Search Book by Title" << endl;
         cout << "4. Exit" << endl;
+		cout << "5. Save to File" << endl;
+		cout << "6. Load from File" << endl;
         cout << "Choose an option: ";
         int choice;
         cin >> choice;
@@ -119,6 +160,24 @@ int main() {
                 system("cls");
                 cout << "Exiting..." << endl;
                 return 0;
+            case 5: {
+                system("cls");
+                string filename;
+                cout << "Enter filename to save: ";
+                cin.ignore();
+                getline(cin, filename);
+                saveToFile(library, filename);
+                break;
+			}
+            case 6: {
+                system("cls");
+                string filename;
+                cout << "Enter filename to load: ";
+                cin.ignore();
+                getline(cin, filename);
+                loadFromFile(library, filename);
+                break;
+            }
             default:
                 cout << "Invalid choice. Please try again." << endl;
         }
