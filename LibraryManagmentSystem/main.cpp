@@ -10,10 +10,10 @@ class Book {
     string author;
     string ID;
     bool isAvailable;  
+	static int IDCounter;
     string generateID() {
-        static int idCounter = 1;
-        return "B" + to_string(idCounter++);
-	}
+        return "B" + to_string(IDCounter++);
+    }
 public:
 	Book(const string& title, const string& author) : title(title), author(author), isAvailable(true) {
         ID = generateID();
@@ -45,8 +45,11 @@ public:
     void setAvailability(bool isAvailable) {
         this->isAvailable = isAvailable;
 	}
-
+    static void updateIDCounter(int lastID) {
+        IDCounter = lastID + 1;
+    }
 };
+int Book::IDCounter = 1;
 void addBook(vector<Book>& library, const Book& book) {
     library.push_back(book);
 }
@@ -81,26 +84,50 @@ void loadFromFile(vector<Book>& library, const string& filename) {
     if (!Fin) {
         cerr << "Error opening file for reading." << endl;
         return;
-	}
+    }
     string line;
+    int maxID = 0;
+
     while (getline(Fin, line)) {
         size_t pos1 = line.find(',');
         size_t pos2 = line.find(',', pos1 + 1);
         size_t pos3 = line.find(',', pos2 + 1);
+
         if (pos1 == string::npos || pos2 == string::npos || pos3 == string::npos) {
-            cerr << "Invalid data format in file." << endl;
             continue;
         }
+
         string title = line.substr(0, pos1);
         string author = line.substr(pos1 + 1, pos2 - pos1 - 1);
         string ID = line.substr(pos2 + 1, pos3 - pos2 - 1);
         bool isAvailable = (line.substr(pos3 + 1) == "1");
+
         Book book(title, author);
         book.setID(ID);
         book.setAvailability(isAvailable);
         library.push_back(book);
+
+        // Safe parsing block
+        try {
+            if (ID.length() > 1) {
+                // Try to convert "12" from "B12"
+                string numberPart = ID.substr(1);
+                int currentID = stoi(numberPart);
+                if (currentID > maxID) {
+                    maxID = currentID;
+                }
+            }
+        }
+        catch (const std::invalid_argument&) {
+            // ID was not a number (e.g. "B-Test"), ignore it safely
+        }
+        catch (const std::out_of_range&) {
+            // ID was too big for an int, ignore it safely
+        }
     }
-	Fin.close();
+    Fin.close();
+    Book::updateIDCounter(maxID);
+    cout << "Library loaded successfully." << endl;
 }
 
 int main() {
@@ -126,12 +153,12 @@ int main() {
         cout << "4. Exit" << endl;
 		cout << "5. Save to File" << endl;
 		cout << "6. Load from File" << endl;
-        cout << "Choose an option: ";
+        //cout << "Choose an option: ";
         int choice;
         while (true) {
-            cout << "Enter your choice: ";
+            cout << "Choose an option: ";
             if (cin >> choice) {
-                // Input was a valid integer!
+                cin.ignore();
                 break;
             }
             else {
@@ -146,7 +173,7 @@ int main() {
                 system("cls");
                 string title, author;
                 cout << "Enter book title: ";
-                cin.ignore();
+                
                 getline(cin, title);
                 cout << "Enter book author: ";
                 getline(cin, author);
@@ -162,7 +189,7 @@ int main() {
                 system("cls");
                 string title;
                 cout << "Enter book title to search: ";
-                cin.ignore();
+                
                 getline(cin, title);
                 searchBookByTitle(library, title);
                 break;
@@ -175,7 +202,7 @@ int main() {
                 system("cls");
                 string filename;
                 cout << "Enter filename to save: ";
-                cin.ignore();
+                
                 getline(cin, filename);
                 saveToFile(library, filename);
                 break;
@@ -184,7 +211,7 @@ int main() {
                 system("cls");
                 string filename;
                 cout << "Enter filename to load: ";
-                cin.ignore();
+               
                 getline(cin, filename);
                 loadFromFile(library, filename);
                 break;
